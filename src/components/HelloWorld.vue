@@ -1,30 +1,28 @@
-<template>
-  <div class="grid-layout">
-     <div class="sesion">
-      <h1>bienvenido</h1>
-      <h2>Si eres nuevo registrece por favor</h2>
-      <input type="text">
-      <input type="password">
-      <button>Registrarce</button>
-      <h2>inicie sesion si ya tiene una cuenta</h2>
-      <input type="text">
-      <input type="password">
-      <button>Iniciar sesion</button>
+<!--
+  <template>
+    <div class="grid-layout">
+      <div class="sesion">
+        <h1>Bienvenido</h1>
+        <h3>Si eres nuevo crea una cuenta</h3>
+        <input type="text">
+        <input type="password">
+        <router-link to="/">Registrarse</router-link>
+        <h3>Si ya tienes una inicia sesion</h3>
+        <input type="text">
+        <input type="password">
+        <button href="">Iniciar sesion</button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
+  name: 'HelloWorld'
 }
 </script>
 
 <style scoped>
-
+@import '@/components/general.css';
 .grid-layout{
   display: flex;
   justify-content: center;
@@ -35,9 +33,11 @@ export default {
   border: solid 1px black;
   text-align: center;
   padding: 20px;
+  background-color: white;
 }
 .sesion input {
   display: block;
   margin: 10px auto;
 }
 </style>
+-->
