@@ -8,7 +8,7 @@
   
 <script>
 export default {
-  name: 'Para registros',
+  name: 'ParaRegistros',
 }
 </script>
   

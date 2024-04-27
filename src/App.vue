@@ -1,9 +1,8 @@
-<!--
-  <template>
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </template>
-  
-  <script>
+<template>
+  <HelloWorld msg="Welcome to Your Vue.js App"/>
+</template>
+
+<script>
   import HelloWorld from './components/HelloWorld.vue'
   
   export default {
@@ -17,15 +16,15 @@
 <style>
 
 </style>
--->
+<!--
 <template>
   <div class="grid-layout">
-     <div class="sesion">
+    <div class="sesion">
       <h1>Bienvenido</h1>
       <h3>Si eres nuevo crea una cuenta</h3>
       <input type="text">
       <input type="password">
-      <router-link to="/">Registrarse</router-link>
+      <button @click="irAOtraPagina">registrarse</button>
       <h3>Si ya tienes una inicia sesion</h3>
       <input type="text">
       <input type="password">
@@ -34,7 +33,13 @@
   </div>
 </template>
 <script>
-
+export default {
+  methods: {
+    irAOtraPagina() {
+      this.$router.push('/registro') 
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -56,3 +61,4 @@
   margin: 10px auto;
 }
 </style>
+-->

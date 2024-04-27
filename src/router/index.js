@@ -3,7 +3,7 @@ import registro from "../views/registro.vue"
 
 const routes = [
   {
-    path: "/",
+    path: "/registro",
     name: "pagina de registro",
     component: registro,
   }
