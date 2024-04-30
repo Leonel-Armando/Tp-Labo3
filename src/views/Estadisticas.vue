@@ -1,14 +1,14 @@
 <template>
-    <div class="grid-layout">
+    <div class="grid-layout-inicio">
        <div class="">
-        <h1>hola</h1>
+        <h1>nop</h1>
       </div>
     </div>
 </template>
   
 <script>
 export default {
-  name: 'ParaRegistros',
+  name: 'PaginaDeEstadisticas',
 }
 </script>
   
