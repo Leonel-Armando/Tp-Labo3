@@ -13,5 +13,5 @@ export default {
 </script>
   
 <style scoped>
-  @import '@/components/general.css';
+@import '@/components/general.css';
 </style>
