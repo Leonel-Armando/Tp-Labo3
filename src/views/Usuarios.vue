@@ -8,13 +8,15 @@
           <p v-if="MSJError.NombreRegistro" style="color: red;">{{ MSJError.NombreRegistro }}</p>
           <p v-if="MSJError.ContraseñaRegistro" style="color: red;">{{ MSJError.ContraseñaRegistro }}</p>
           <p>{{ MSJRegistro }}</p>
-          <button @click="RegistrarUsuario">registrarse</button>
+          <button @click="RegistrarUsuario" v-if="!Sesion">registrarse</button>
           <h3>Si ya tienes una inicia sesion</h3>
           <input placeholder="Nombre" type="text" v-model="NombreSesion" @input="ValidacionNombre('NombreSesion')">
           <input placeholder="Contraseña" v-model="ContraseñaSesion" type="password" @input="ValidacionContraseña('ContraseñaSesion')">
           <p v-if="MSJError.NombreSesion" style="color: red;">{{ MSJError.NombreSesion }}</p>
           <p v-if="MSJError.ContraseñaSesion" style="color: red;">{{ MSJError.ContraseñaSesion }}</p>
-          <button>Iniciar sesion</button>
+          <p>{{ MSJSesion }}</p>
+          <button @click="InicioSesion" v-if="!Sesion">Iniciar sesion</button>
+          <button @click="CerrarSesion" v-if="Sesion">Cerrar sesión</button>
       </div>
     </div>
   </template>
@@ -30,6 +32,7 @@
       MSJRegistro: '',
       NombreSesion: '',
       ContraseñaSesion:'',
+      MSJSesion:'',
       ID:'',
       MSJError: {
         NombreRegistro: '',
@@ -40,6 +43,28 @@
     };
   },
   methods: {
+
+    InicioSesion(){
+      this.ValidacionNombre('NombreSesion');
+      this.ValidacionContraseña('ContraseñaSesion');
+
+      if (this.MSJError.NombreSesion || this.MSJError.ContraseñaSesion) { 
+        return;
+      }
+    
+      const Usuarios = JSON.parse(localStorage.getItem('Usuario')) || [];
+      const UsuarioEncontrado = Usuarios.find(usuario => usuario.Nombre === this.NombreSesion && usuario.Contraseña === this.ContraseñaSesion);
+
+      if (!UsuarioEncontrado) {
+        this.MSJSesion = 'Usuario y/o contraseña incorrecta';
+        return;
+      }
+
+      this.MSJSesion = 'Sesión iniciada';
+      this.Sesion = true;
+      this.ID = UsuarioEncontrado.id;
+    },
+
     RegistrarUsuario() {
       this.ValidacionNombre('NombreRegistro');
       this.ValidacionContraseña('ContraseñaRegistro');
@@ -66,6 +91,14 @@
       this.ContraseñaRegistro = '';
       this.Sesion = true;
     },
+
+    CerrarSesion() {
+    this.Sesion = false;
+    this.MSJRegistro = '';
+    this.MSJSesion = '';
+    this.ID = '';
+    },
+
     ValidacionNombre(Nombre) {
       const ValoresValidos = /^[A-Za-z]+$/;
 
@@ -77,13 +110,15 @@
         this.MSJError[Nombre] = '';
       }
     },
-    ValidacionContraseña(Nombre) {
-      if (!this[Nombre]) {
-        this.MSJError[Nombre] = `La contraseña no puede estar vacía.`;
+
+    ValidacionContraseña(contraseña) {
+      if (!this[contraseña]) {
+        this.MSJError[contraseña] = `La contraseña no puede estar vacía.`;
       } else {
-        this.MSJError[Nombre] = '';
+        this.MSJError[contraseña] = '';
       }
     },
+
     CrearID() {
       const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       let IDGenerado = '';
@@ -95,6 +130,7 @@
 
       return IDGenerado;
     },
+
   },
 }
 </script>
