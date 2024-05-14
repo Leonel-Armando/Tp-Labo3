@@ -19,9 +19,10 @@
         </div>
       </div>
     </div>
+    <button @click="test">test</button>
   </div>
-  </template>
-  
+</template>
+<CompraVenta :idDeUsuario="idDeUsuario" />
 <script>
 import axios from 'axios';
 export default {
@@ -33,9 +34,22 @@ export default {
       precioCompra: '',
       CANTCripto: '',
       MSJError:'',
+      cuentaActivaID:'',
     }
   },
   methods: {
+    test(){
+      alert()
+    },
+    FechaActual() {
+      const now = new Date();
+        const year = now.getFullYear();
+        const month = `${now.getMonth() + 1}`.padStart(2, '0');
+        const day = `${now.getDate()}`.padStart(2, '0');
+        const hour = `${now.getHours()}`.padStart(2, '0');
+        const minute = `${now.getMinutes()}`.padStart(2, '0');
+        return `${day}-${month}-${year}  ${hour}:${minute}`;
+    },
     ObtenerPrecios() {
       axios.get(`https://criptoya.com/api/argenbtc/${this.CriptoElegida}/ars/1`)
         .then(response => {
@@ -50,10 +64,24 @@ export default {
       this.precioCompra = this.precioActual * this.CANTCripto
     },
     Comprar(){
-      this.ValidarCantidad();
+      this.ValidarCantidad('CANTCripto');
+      if (this.MSJError) { 
+        return;
+      }
+      //const nuevaTransaccion = {
+      //    user_id: this.idDeUsuario,
+      //    action: this.tipoDeOperacion === 'comprar' ? 'purchase' : 'sale',
+      //    crypto_code: this.criptomonedaSeleccionada,
+      //    crypto_amount: this.cantidad.toString(),
+      //    money: this.monto.toString(),
+      //    datetime: this.fechaHoraActual(),
+      //  };
     },
     Vender(){
-      this.ValidarCantidad();
+      this.ValidarCantidad('CANTCripto');
+      if (this.MSJError) { 
+        return;
+      }
     },
     ValidarCantidad(cantidad){
       if (cantidad === 0) {
@@ -85,6 +113,7 @@ export default {
   },
   mounted() {
     this.ObtenerPrecios();
+    this.cuentaActivaID = localStorage.getItem('CuentaActivaID');
   }
 }
   

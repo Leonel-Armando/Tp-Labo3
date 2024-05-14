@@ -19,6 +19,7 @@
           <button @click="CerrarSesion" v-if="Sesion">Cerrar sesión</button>
       </div>
     </div>
+    <CompraVenta :cuenta-activa="CuentaActiva" />
   </template>
   
 <script>
@@ -59,10 +60,12 @@
         this.MSJSesion = 'Usuario y/o contraseña incorrecta';
         return;
       }
-
+      this.NombreSesion='';
+      this.ContraseñaSesion='';
       this.MSJSesion = 'Sesión iniciada';
       this.Sesion = true;
       this.ID = UsuarioEncontrado.id;
+      localStorage.setItem('CuentaActivaID', UsuarioEncontrado.id);
     },
 
     RegistrarUsuario() {
@@ -87,6 +90,7 @@
       Usuario.push({ Nombre: this.NombreRegistro, Contraseña: this.ContraseñaRegistro, id: this.ID });
       localStorage.setItem('Usuario', JSON.stringify(Usuario));
 
+      localStorage.setItem('CuentaActivaID', this.ID);
       this.NombreRegistro = '';
       this.ContraseñaRegistro = '';
       this.Sesion = true;
