@@ -101,6 +101,7 @@
     this.MSJRegistro = '';
     this.MSJSesion = '';
     this.ID = '';
+    localStorage.removeItem('CuentaActivaID');
     },
 
     ValidacionNombre(Nombre) {

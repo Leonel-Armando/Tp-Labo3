@@ -10,7 +10,7 @@
           <option value="usdt">USDT</option>
         </select>
         <div class="precios">
-          <span>Tienes x. El precio actual es: {{ precioActual }} <br> Valor a pagar: {{ precioCompra }} <br>{{ MSJError }}</span>
+          <span>Tienes {{ cantidadActual }}. El precio actual es: {{ precioActual }} <br> Valor a pagar: {{ precioCompra }} <br>{{ MSJError }}</span>
         </div>
         <div class="acciones">
           <input @input="CalcularPrecio,ValidarCantidad(CANTCripto)" type="number" v-model="CANTCripto" step="any" class="input">
@@ -35,6 +35,21 @@ export default {
       CANTCripto: '',
       MSJError:'',
       cuentaActivaID:'',
+      preciosCripto: {
+        btc: 0,
+        eth: 0,
+        dai: 0,
+        usdt: 0
+      },
+      cantidadActual: 0,
+      Transaccion : {
+        user_id: null,
+        action: null,
+        crypto_code: null,
+        crypto_amount: null,
+        money: null,
+        datetime: null,
+      },
     }
   },
   methods: {
@@ -59,6 +74,7 @@ export default {
         .catch(error => {
           console.error('Error al obtener los precios:', error);
         });
+        this.cantidadActual = this.preciosCripto[this.CriptoElegida];
     },
     CalcularPrecio (){
       this.precioCompra = this.precioActual * this.CANTCripto
@@ -68,14 +84,44 @@ export default {
       if (this.MSJError) { 
         return;
       }
-      //const nuevaTransaccion = {
-      //    user_id: this.idDeUsuario,
-      //    action: this.tipoDeOperacion === 'comprar' ? 'purchase' : 'sale',
-      //    crypto_code: this.criptomonedaSeleccionada,
-      //    crypto_amount: this.cantidad.toString(),
-      //    money: this.monto.toString(),
-      //    datetime: this.fechaHoraActual(),
-      //  };
+      this.Transaccion.user_id= this.cuentaActivaID;
+      this.Transaccion.action= 'purchase';
+      this.Transaccion.crypto_code= this.CriptoElegida;
+      this.Transaccion.crypto_amount= this.CANTCripto.toString();
+      this.Transaccion.money= this.precioCompra.toString();
+      this.Transaccion. datetime= this.FechaActual();
+
+      if(!this.Transaccion.user_id){  
+        alert('Error el usuario esta vacio')
+        return
+      }
+      if(!this.Transaccion.crypto_code){  
+        alert('Error la cripto esta vacia')
+        return
+      }
+      if(!this.Transaccion.crypto_amount){  
+        alert('Error la cantidad de cripto esta vacia')
+        return
+      }
+      if(!this.Transaccion.money){  
+        alert('Error el monto esta vacio')
+        return
+      }
+      if(!this.Transaccion.datetime){  
+        alert('Error la fecha esta vacia')
+        return
+      }
+      axios.post('https://laboratorio3-f36a.restdb.io/rest/transactions', this.Transaccion, {
+          headers: {
+            'x-apikey': '60eb09146661365596af552f',
+          },
+        })
+        .then((response) => {
+          console.log('Compra exitosa:', response.data);
+        })
+        .catch((error) => {
+          console.error('Error Comprar:', error);
+        });
     },
     Vender(){
       this.ValidarCantidad('CANTCripto');
@@ -84,32 +130,14 @@ export default {
       }
     },
     ValidarCantidad(cantidad){
-      if (cantidad === 0) {
-        this.MSJError = 'La cantidad no puede ser 0'
+      if (cantidad <= 0) {
+        this.MSJError = 'La cantidad debe ser mayor a 0'
       } else if(!cantidad){  
-        this.MSJError = `La cantidad no puede estar vacia.`;
+        this.MSJError = 'La cantidad no puede estar vacia';
       } else {
         this.MSJError = '';
       }
     },
-    ApiClient() {
-        return axios.create({
-          baseURL: 'https://laboratorio3-f36a.restdb.io/rest/',
-          headers: {'x-apikey': '60eb09146661365596af552f'},
-          //baseURL: 'https://labor3-d60e.restdb.io/rest/',
-          //headers: {'x-apikey':'64a2e9bc86d8c525a3ed8f63'},
-          //baseURL: 'https://laboratorio3-5459.restdb.io/rest',
-          //headers: {'x-apikey':'64a57c2b86d8c50fe6ed8fa5'},
-          //baseURL: 'https://laboratorio-36cf.restdb.io/rest',
-          //headers: {'x-apikey':'64a5ccf686d8c5d256ed8fce'},
-          //baseURL: 'https://laboratorio3-f36a.restdb.io/rest',
-          //headers: {'x-apikey':'64bdbc3386d8c5613ded91e7'},
-          //baseURL: 'https://laboratorio-ab82.restdb.io/rest',
-          //headers: {'x-apikey':'650b525568885487530c00bb'},
-          //baseURL: 'https://laboratorio-afe2.restdb.io/rest',
-          //headers: {'x-apikey':'650b53356888544ec60c00bf'},
-        });
-      },
   },
   mounted() {
     this.ObtenerPrecios();
