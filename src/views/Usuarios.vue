@@ -15,11 +15,10 @@
           <p v-if="MSJError.NombreSesion" style="color: red;">{{ MSJError.NombreSesion }}</p>
           <p v-if="MSJError.ContraseñaSesion" style="color: red;">{{ MSJError.ContraseñaSesion }}</p>
           <p>{{ MSJSesion }}</p>
-          <button @click="InicioSesion" v-if="!Sesion">Iniciar sesion</button>
-          <button @click="CerrarSesion" v-if="Sesion">Cerrar sesión</button>
+          <button @click="InicioSesion" v-if="!Sesion && !cuentaActivaID">Iniciar sesion</button>
+          <button @click="CerrarSesion" v-if="Sesion && cuentaActivaID">Cerrar sesión</button>
       </div>
     </div>
-    <CompraVenta :cuenta-activa="CuentaActiva" />
   </template>
   
 <script>
@@ -41,10 +40,10 @@
         ContraseñaRegistro: '',
         ContraseñaSesion: '',
       },
+      cuentaActivaID:'',
     };
   },
   methods: {
-
     InicioSesion(){
       this.ValidacionNombre('NombreSesion');
       this.ValidacionContraseña('ContraseñaSesion');
@@ -60,12 +59,13 @@
         this.MSJSesion = 'Usuario y/o contraseña incorrecta';
         return;
       }
+      this.MSJSesion = 'Usuario actual ' + this.NombreSesion;
       this.NombreSesion='';
       this.ContraseñaSesion='';
-      this.MSJSesion = 'Sesión iniciada';
       this.Sesion = true;
       this.ID = UsuarioEncontrado.id;
       localStorage.setItem('CuentaActivaID', UsuarioEncontrado.id);
+      this.cuentaActivaID = UsuarioEncontrado.id;
     },
 
     RegistrarUsuario() {
@@ -90,10 +90,12 @@
       Usuario.push({ Nombre: this.NombreRegistro, Contraseña: this.ContraseñaRegistro, id: this.ID });
       localStorage.setItem('Usuario', JSON.stringify(Usuario));
 
+      this.MSJSesion = 'Usuario actual ' + this.NombreRegistro;
       localStorage.setItem('CuentaActivaID', this.ID);
       this.NombreRegistro = '';
       this.ContraseñaRegistro = '';
       this.Sesion = true;
+      this.cuentaActivaID = this.ID;
     },
 
     CerrarSesion() {
@@ -102,6 +104,7 @@
     this.MSJSesion = '';
     this.ID = '';
     localStorage.removeItem('CuentaActivaID');
+    this.cuentaActivaID = '';
     },
 
     ValidacionNombre(Nombre) {
@@ -135,8 +138,20 @@
 
       return IDGenerado;
     },
-
+    
+    CuentaAnterior(){
+      this.cuentaActivaID = localStorage.getItem('CuentaActivaID');
+      if(this.cuentaActivaID){
+        this.Sesion = true;
+        const Usuarios = JSON.parse(localStorage.getItem('Usuario')) || [];
+        const UsuarioActual = Usuarios.find(usuario => usuario.id === this.cuentaActivaID );
+        this.MSJSesion = 'Usuario actual ' + UsuarioActual.Nombre;
+      }
+    },
   },
+  mounted(){
+    this.CuentaAnterior()
+  }
 }
 </script>
   

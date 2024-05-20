@@ -1,4 +1,4 @@
-  <template>
+<template>
     <div>
       <div class="encabezado">
         <nav>
@@ -10,7 +10,7 @@
       </div>
       <router-view></router-view>
     </div>
-    </template>
+</template>
 <script>
 export default {
   name: 'PaginaDeInicio',

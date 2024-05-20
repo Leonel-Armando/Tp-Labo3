@@ -1,28 +1,26 @@
 <template>
-  <div class="grid-layout-inicio">
-    <div class="caja">
-      <h3>Elija la criptomoneda que desee comprar o vender</h3>
-      <div class="cripto">
-        <select v-model="CriptoElegida" @change="ObtenerPrecios" class="SelectCriptos">
-          <option value="btc">Bitcoin</option>
-          <option value="eth">Ethereum</option>
-          <option value="dai">DAI</option>
-          <option value="usdt">USDT</option>
-        </select>
-        <div class="precios">
-          <span>Tienes {{ cantidadActual }}. El precio actual es: {{ precioActual }} <br> Valor a pagar: {{ precioCompra }} <br>{{ MSJError }}</span>
-        </div>
-        <div class="acciones">
-          <input @input="CalcularPrecio,ValidarCantidad(CANTCripto)" type="number" v-model="CANTCripto" step="any" class="input">
+    <div class="grid-layout-inicio">
+      <div class="caja">
+        <h3>Elija la criptomoneda que desee comprar o vender</h3>
+        <div class="cripto">
+          <select v-model="CriptoElegida" @change="ObtenerPrecios" class="SelectCriptos">
+            <option value="btc">Bitcoin</option>
+            <option value="eth">Ethereum</option>
+            <option value="dai">DAI</option>
+            <option value="usdt">USDT</option>
+          </select>
+          <div class="precios">
+            <span>Tienes {{ cantidadActual }}. El precio actual es: {{ precioActual }} <br> Valor a pagar: {{ precioCompra }} <br>{{ MSJError }}</span>
+          </div>
+          <div class="acciones">
+            <input @input="ValidarCantidad(CANTCripto)" type="number" v-model.number="CANTCripto" step="any" class="input">
           <button class="boton" @click="Comprar">comprar</button>
           <button class="boton" @click="Vender">vender</button>
         </div>
       </div>
     </div>
-    <button @click="test">test</button>
   </div>
 </template>
-<CompraVenta :idDeUsuario="idDeUsuario" />
 <script>
 import axios from 'axios';
 export default {
@@ -52,29 +50,31 @@ export default {
       },
     }
   },
+  watch: {
+    CANTCripto() {
+      this.CalcularPrecio(); 
+    }
+  },
   methods: {
-    test(){
-      alert()
-    },
     FechaActual() {
       const now = new Date();
-        const year = now.getFullYear();
-        const month = `${now.getMonth() + 1}`.padStart(2, '0');
-        const day = `${now.getDate()}`.padStart(2, '0');
-        const hour = `${now.getHours()}`.padStart(2, '0');
-        const minute = `${now.getMinutes()}`.padStart(2, '0');
-        return `${day}-${month}-${year}  ${hour}:${minute}`;
+      const year = now.getFullYear();
+      const month = `${now.getMonth() + 1}`.padStart(2, '0');
+      const day = `${now.getDate()}`.padStart(2, '0');
+      const hour = `${now.getHours()}`.padStart(2, '0');
+      const minute = `${now.getMinutes()}`.padStart(2, '0');
+      return `${day}-${month}-${year}  ${hour}:${minute}`;
     },
     ObtenerPrecios() {
       axios.get(`https://criptoya.com/api/argenbtc/${this.CriptoElegida}/ars/1`)
-        .then(response => {
-          this.precioActual = response.data.ask;
-          this.CalcularPrecio();
-        })
-        .catch(error => {
-          console.error('Error al obtener los precios:', error);
-        });
-        this.cantidadActual = this.preciosCripto[this.CriptoElegida];
+      .then(response => {
+        this.precioActual = response.data.ask;
+        this.CalcularPrecio();
+      })
+      .catch(error => {
+        console.error('Error al obtener los precios:', error);
+      });
+      this.cantidadActual = this.preciosCripto[this.CriptoElegida];
     },
     CalcularPrecio (){
       this.precioCompra = this.precioActual * this.CANTCripto
@@ -90,7 +90,7 @@ export default {
       this.Transaccion.crypto_amount= this.CANTCripto.toString();
       this.Transaccion.money= this.precioCompra.toString();
       this.Transaccion. datetime= this.FechaActual();
-
+      
       if(!this.Transaccion.user_id){  
         alert('Error el usuario esta vacio')
         return
@@ -112,28 +112,68 @@ export default {
         return
       }
       axios.post('https://laboratorio3-f36a.restdb.io/rest/transactions', this.Transaccion, {
-          headers: {
-            'x-apikey': '60eb09146661365596af552f',
-          },
-        })
-        .then((response) => {
-          console.log('Compra exitosa:', response.data);
-        })
-        .catch((error) => {
-          console.error('Error Comprar:', error);
-        });
+        headers: {
+          'x-apikey': '60eb09146661365596af552f',
+        },
+      })
+      .then((response) => {
+        console.log('Compra exitosa:', response.data);
+      })
+      .catch((error) => {
+        console.error('Error Comprar:', error);
+      });
     },
     Vender(){
       this.ValidarCantidad('CANTCripto');
       if (this.MSJError) { 
         return;
       }
+      this.Transaccion.user_id= this.cuentaActivaID;
+      this.Transaccion.action= 'sale';
+      this.Transaccion.crypto_code= this.CriptoElegida;
+      this.Transaccion.crypto_amount= this.CANTCripto.toString();
+      this.Transaccion.money= this.precioCompra.toString();
+      this.Transaccion. datetime= this.FechaActual();
+      
+      if(!this.Transaccion.user_id){  
+        alert('Error el usuario esta vacio')
+        return
+      }
+      if(!this.Transaccion.crypto_code){  
+        alert('Error la cripto esta vacia')
+        return
+      }
+      if(!this.Transaccion.crypto_amount){  
+        alert('Error la cantidad de cripto esta vacia')
+        return
+      }
+      if(!this.Transaccion.money){  
+        alert('Error el monto esta vacio')
+        return
+      }
+      if(!this.Transaccion.datetime){  
+        alert('Error la fecha esta vacia')
+        return
+      }
+      axios.post('https://laboratorio3-f36a.restdb.io/rest/transactions', this.Transaccion, {
+        headers: {
+          'x-apikey': '60eb09146661365596af552f',
+        },
+      })
+      .then((response) => {
+        console.log('Venta exitosa', response.data);
+      })
+      .catch((error) => {
+        console.error('Error al vender', error);
+      });
     },
     ValidarCantidad(cantidad){
       if (cantidad <= 0) {
-        this.MSJError = 'La cantidad debe ser mayor a 0'
+        this.MSJError = 'La cantidad debe ser mayor a 0';
+        this.precioCompra = '**';
       } else if(!cantidad){  
         this.MSJError = 'La cantidad no puede estar vacia';
+        this.precioCompra = '**';
       } else {
         this.MSJError = '';
       }
@@ -144,9 +184,9 @@ export default {
     this.cuentaActivaID = localStorage.getItem('CuentaActivaID');
   }
 }
-  
+
 </script>
-  
+
 <style scoped>
 @import '@/components/general.css';
 .grid-layout-inicio {
