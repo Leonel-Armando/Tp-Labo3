@@ -10,15 +10,16 @@
             <option value="usdt">USDT</option>
           </select>
           <div class="precios">
-            <span>Tienes {{ cantidadActual }}. El precio actual es: {{ precioActual }} <br> Valor a pagar: {{ precioCompra }} <br>{{ MSJError }}</span>
+            <span>Tienes {{ CantCripto[CriptoElegida] }} el precio actual es: {{ precioActual }} <br> Valor a pagar: {{ precioCompra }} <br>{{ MSJError }}</span>
           </div>
           <div class="acciones">
-            <input @input="ValidarCantidad(CANTCripto)" type="number" v-model.number="CANTCripto" step="any" class="input">
+            <input @input="ValidarCantidad(CantAUsar)" type="number" v-model.number="CantAUsar" step="any" class="input">
           <button class="boton" @click="Comprar">comprar</button>
           <button class="boton" @click="Vender">vender</button>
         </div>
       </div>
     </div>
+    <h4>{{ resultado }}</h4>
   </div>
 </template>
 <script>
@@ -27,17 +28,17 @@ export default {
   name: 'PaginaDeMovimientos',
   data() {
     return{
-      CriptoElegida: 'btc',
+      CriptoElegida: '',
       precioActual: '',
       precioCompra: '',
-      CANTCripto: '',
+      CantAUsar: '',
       MSJError:'',
       cuentaActivaID:'',
-      preciosCripto: {
+      CantCripto: {
         btc: 0,
         eth: 0,
         dai: 0,
-        usdt: 0
+        usdt: 0,
       },
       cantidadActual: 0,
       Transaccion : {
@@ -48,10 +49,12 @@ export default {
         money: null,
         datetime: null,
       },
+      datos:[],
+      resultado:'',
     }
   },
   watch: {
-    CANTCripto() {
+    CantAUsar() {
       this.CalcularPrecio(); 
     }
   },
@@ -65,6 +68,23 @@ export default {
       const minute = `${now.getMinutes()}`.padStart(2, '0');
       return `${day}-${month}-${year}  ${hour}:${minute}`;
     },
+    async ActualizarCantidad(){
+      let cantidades = {
+        btc: 0,
+        eth: 0,
+        dai: 0,
+        usdt: 0,
+      };
+      for(let i = 0; i < this.datos.length; i++){
+        const transaccion = this.datos[i];
+        if (transaccion.action === 'purchase') {
+          cantidades[transaccion.crypto_code] += transaccion.crypto_amount;
+        } else if (transaccion.action === 'sale') {
+          cantidades[transaccion.crypto_code] -= transaccion.crypto_amount;
+        }
+      }
+      this.CantCripto = { ...cantidades };
+    },
     ObtenerPrecios() {
       axios.get(`https://criptoya.com/api/argenbtc/${this.CriptoElegida}/ars/1`)
       .then(response => {
@@ -74,22 +94,23 @@ export default {
       .catch(error => {
         console.error('Error al obtener los precios:', error);
       });
-      this.cantidadActual = this.preciosCripto[this.CriptoElegida];
+      
     },
     CalcularPrecio (){
-      this.precioCompra = this.precioActual * this.CANTCripto
+      this.precioCompra = this.precioActual * this.CantAUsar
+      this.ActualizarCantidad()
     },
     Comprar(){
-      this.ValidarCantidad('CANTCripto');
+      this.ValidarCantidad('CantAUsar');
       if (this.MSJError) { 
         return;
       }
       this.Transaccion.user_id= this.cuentaActivaID;
       this.Transaccion.action= 'purchase';
       this.Transaccion.crypto_code= this.CriptoElegida;
-      this.Transaccion.crypto_amount= this.CANTCripto.toString();
-      this.Transaccion.money= this.precioCompra.toString();
-      this.Transaccion. datetime= this.FechaActual();
+      this.Transaccion.crypto_amount= this.CantAUsar;
+      this.Transaccion.money= this.precioCompra;
+      this.Transaccion.datetime= this.FechaActual();
       
       if(!this.Transaccion.user_id){  
         alert('Error el usuario esta vacio')
@@ -118,21 +139,26 @@ export default {
       })
       .then((response) => {
         console.log('Compra exitosa:', response.data);
+        this.resultado = 'Compra exitosa'
       })
       .catch((error) => {
-        console.error('Error Comprar:', error);
+        console.error('Error al Comprar:', error);
       });
     },
     Vender(){
-      this.ValidarCantidad('CANTCripto');
+      this.ValidarCantidad('CantAUsar');
       if (this.MSJError) { 
         return;
+      }
+      if (this.CantCripto[this.CriptoElegida] < this.CantAUsar){
+        console.log('Error al vender')
+        return
       }
       this.Transaccion.user_id= this.cuentaActivaID;
       this.Transaccion.action= 'sale';
       this.Transaccion.crypto_code= this.CriptoElegida;
-      this.Transaccion.crypto_amount= this.CANTCripto.toString();
-      this.Transaccion.money= this.precioCompra.toString();
+      this.Transaccion.crypto_amount= this.CantAUsar;
+      this.Transaccion.money= this.precioCompra;
       this.Transaccion. datetime= this.FechaActual();
       
       if(!this.Transaccion.user_id){  
@@ -162,6 +188,7 @@ export default {
       })
       .then((response) => {
         console.log('Venta exitosa', response.data);
+        this.resultado = 'Venta exitosa'
       })
       .catch((error) => {
         console.error('Error al vender', error);
@@ -170,18 +197,31 @@ export default {
     ValidarCantidad(cantidad){
       if (cantidad <= 0) {
         this.MSJError = 'La cantidad debe ser mayor a 0';
-        this.precioCompra = '**';
       } else if(!cantidad){  
         this.MSJError = 'La cantidad no puede estar vacia';
-        this.precioCompra = '**';
       } else {
         this.MSJError = '';
       }
+    },
+    TraerDatos(){
+      const userId = this.cuentaActivaID;
+      axios.get(`https://laboratorio3-f36a.restdb.io/rest/transactions?q={"user_id":"${userId}"}`, {
+        headers: {
+          'x-apikey': '60eb09146661365596af552f'
+        }
+      })
+      .then((response) => {
+        this.datos = response.data;
+      })
+      .catch((error) => {
+        console.error('Error al obtener los datos', error);
+      })
     },
   },
   mounted() {
     this.ObtenerPrecios();
     this.cuentaActivaID = localStorage.getItem('CuentaActivaID');
+    this.TraerDatos();
   }
 }
 

@@ -9,6 +9,7 @@
           <p><strong>Valor:</strong> {{ movimiento.money }}</p>
           <p><strong>Accion:</strong> {{ traducirAccion(movimiento.action) }}</p>
           <p><strong>Fecha:</strong> {{ new Date(movimiento.datetime).toLocaleString() }}</p>
+          <button>Editar</button><button class="eliminar" @click="Eliminar(movimiento._id)">Eliminar</button>
         </li>
       </ul> 
     </div>
@@ -22,11 +23,25 @@ export default {
   data(){
     return{
       cuentaActivaID:'',
-      movimientos:[]
+      movimientos:[],
     }
   },
   methods:{
-    TraerHistorial(){
+    Eliminar(id) {
+      axios.delete(`https://laboratorio3-f36a.restdb.io/rest/transactions/${id}`, {
+        headers: {
+          'x-apikey': '60eb09146661365596af552f'
+        }
+      })
+      .then((response) => {
+        console.log('Movimiento eliminado:', response.data);
+        this.TraerHistorial();
+      })
+      .catch((error) => {
+        console.error('Error al eliminar el movimiento:', error);
+      });
+    },
+    async TraerHistorial(){
       const userId = this.cuentaActivaID;
       axios.get(`https://laboratorio3-f36a.restdb.io/rest/transactions?q={"user_id":"${userId}"}`, {
         headers: {
@@ -58,6 +73,10 @@ export default {
 <style scoped>
 @import '@/components/general.css';
 
+.eliminar{
+  background-color: red; 
+  color: white;
+}
 .historial {
   padding: 20px;
 }
