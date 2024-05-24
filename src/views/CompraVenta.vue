@@ -10,7 +10,7 @@
             <option value="usdt">USDT</option>
           </select>
           <div class="precios">
-            <span>Tienes {{ CantCripto[CriptoElegida] }} el precio actual es: {{ precioActual }} <br> Valor a pagar: {{ precioCompra }} <br>{{ MSJError }}</span>
+            <span>Tienes {{ CantCripto[CriptoElegida] }} el precio actual es: {{ precioActual }} <br> Valor a pagar: {{ precioCompra }}</span>
           </div>
           <div class="acciones">
             <input @input="ValidarCantidad(CantAUsar)" type="number" v-model.number="CantAUsar" step="any" class="input">
@@ -19,7 +19,13 @@
         </div>
       </div>
     </div>
-    <h4>{{ resultado }}</h4>
+    <div class="Error">
+      <h4>{{ MSJError }}</h4>
+    </div>
+    <div class="Aviso">
+      <h4 v-if="cargando">{{ esperando }}</h4>
+      <h4>{{ resultado }}</h4>
+    </div>
   </div>
 </template>
 <script>
@@ -51,6 +57,8 @@ export default {
       },
       datos:[],
       resultado:'',
+      esperando: 'Cargando accion',
+      cargando: false,
     }
   },
   watch: {
@@ -59,14 +67,16 @@ export default {
     }
   },
   methods: {
+    Limpiar() {
+      const tiempo = 6000;
+      
+      setTimeout(() => {
+        this.resultado=''
+      }, tiempo);
+    },
     FechaActual() {
       const now = new Date();
-      const year = now.getFullYear();
-      const month = `${now.getMonth() + 1}`.padStart(2, '0');
-      const day = `${now.getDate()}`.padStart(2, '0');
-      const hour = `${now.getHours()}`.padStart(2, '0');
-      const minute = `${now.getMinutes()}`.padStart(2, '0');
-      return `${day}-${month}-${year}  ${hour}:${minute}`;
+      return now.toISOString();
     },
     async ActualizarCantidad(){
       let cantidades = {
@@ -94,7 +104,6 @@ export default {
       .catch(error => {
         console.error('Error al obtener los precios:', error);
       });
-      
     },
     CalcularPrecio (){
       this.precioCompra = this.precioActual * this.CantAUsar
@@ -105,6 +114,8 @@ export default {
       if (this.MSJError) { 
         return;
       }
+      this.cargando = true;
+
       this.Transaccion.user_id= this.cuentaActivaID;
       this.Transaccion.action= 'purchase';
       this.Transaccion.crypto_code= this.CriptoElegida;
@@ -113,7 +124,7 @@ export default {
       this.Transaccion.datetime= this.FechaActual();
       
       if(!this.Transaccion.user_id){  
-        alert('Error el usuario esta vacio')
+        alert('Error el usuario usuario no esta registrado')
         return
       }
       if(!this.Transaccion.crypto_code){  
@@ -138,12 +149,19 @@ export default {
         },
       })
       .then((response) => {
+        this.cargando = false;
         console.log('Compra exitosa:', response.data);
         this.resultado = 'Compra exitosa'
+        this.CantAUsar = ''
       })
       .catch((error) => {
+        this.cargando = false;
         console.error('Error al Comprar:', error);
+        this.resultado = ''
+        this.CantAUsar = ''
+        this.MSJError = 'Error en la compra'
       });
+      this.Limpiar();
     },
     Vender(){
       this.ValidarCantidad('CantAUsar');
@@ -151,9 +169,10 @@ export default {
         return;
       }
       if (this.CantCripto[this.CriptoElegida] < this.CantAUsar){
-        console.log('Error al vender')
+        this.MSJError = 'No tienes esa cantidad para vender'
         return
       }
+      this.cargando = true;
       this.Transaccion.user_id= this.cuentaActivaID;
       this.Transaccion.action= 'sale';
       this.Transaccion.crypto_code= this.CriptoElegida;
@@ -162,7 +181,7 @@ export default {
       this.Transaccion. datetime= this.FechaActual();
       
       if(!this.Transaccion.user_id){  
-        alert('Error el usuario esta vacio')
+        alert('Error el usuario no esta registrado')
         return
       }
       if(!this.Transaccion.crypto_code){  
@@ -187,12 +206,19 @@ export default {
         },
       })
       .then((response) => {
+        this.cargando = false;
         console.log('Venta exitosa', response.data);
         this.resultado = 'Venta exitosa'
+        this.CantAUsar = ''
       })
       .catch((error) => {
+        this.cargando = false;
         console.error('Error al vender', error);
+        this.CantAUsar = ''
+        this.resultado = ''
+        this.MSJError = 'Error en la venta'
       });
+      this.Limpiar();
     },
     ValidarCantidad(cantidad){
       if (cantidad <= 0) {
@@ -233,6 +259,13 @@ export default {
   display: flex;
   flex-direction: column; 
   align-items: center; 
+}
+.Error{
+  background-color: red;
+  color: white;
+}
+.Aviso{
+  background-color: greenyellow;
 }
 .caja {
   margin-top: 60px;
