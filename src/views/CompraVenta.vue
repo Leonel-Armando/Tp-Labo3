@@ -1,19 +1,20 @@
 <template>
-    <div class="grid-layout-inicio">
-      <div class="caja">
-        <h3>Elija la criptomoneda que desee comprar o vender</h3>
-        <div class="cripto">
-          <select v-model="CriptoElegida" @change="ObtenerPrecios" class="SelectCriptos">
-            <option value="btc">Bitcoin</option>
-            <option value="eth">Ethereum</option>
-            <option value="dai">DAI</option>
-            <option value="usdt">USDT</option>
-          </select>
-          <div class="precios">
-            <span>Tienes {{ CantCripto[CriptoElegida] }} el precio actual es: {{ precioActual }} <br> Valor a pagar: {{ precioCompra }}</span>
-          </div>
-          <div class="acciones">
-            <input @input="ValidarCantidad(CantAUsar)" type="number" v-model.number="CantAUsar" step="any" class="input">
+  <h2 v-if="!cuentaActivaID">Inicie sesion</h2>
+  <div v-if="cuentaActivaID" class="grid-layout-inicio">
+    <div class="caja">
+      <h3>Elija la criptomoneda que desee comprar o vender</h3>
+      <div class="cripto">
+        <select v-model="CriptoElegida" @change="ObtenerPrecios" class="SelectCriptos">
+          <option value="btc">Bitcoin</option>
+          <option value="eth">Ethereum</option>
+          <option value="dai">DAI</option>
+          <option value="usdt">USDT</option>
+        </select>
+        <div class="precios">
+          <span>Tienes {{ CantCripto[CriptoElegida] }} el precio actual es: {{ precioActual }} <br> Valor a pagar: {{ precioCompra }}</span>
+        </div>
+        <div class="acciones">
+          <input @input="ValidarCantidad(CantAUsar)" type="number" step="0.1" min="0.0000001" v-model.number="CantAUsar" class="input">
           <button class="boton" @click="Comprar">comprar</button>
           <button class="boton" @click="Vender">vender</button>
         </div>
@@ -35,9 +36,9 @@ export default {
   data() {
     return{
       CriptoElegida: '',
-      precioActual: '',
-      precioCompra: '',
-      CantAUsar: '',
+      precioActual: 0,
+      precioCompra: 0,
+      CantAUsar: 0,
       MSJError:'',
       cuentaActivaID:'',
       CantCripto: {
@@ -46,7 +47,6 @@ export default {
         dai: 0,
         usdt: 0,
       },
-      cantidadActual: 0,
       Transaccion : {
         user_id: null,
         action: null,
@@ -106,7 +106,7 @@ export default {
       });
     },
     CalcularPrecio (){
-      this.precioCompra = this.precioActual * this.CantAUsar
+      this.precioCompra = parseFloat((this.precioActual * this.CantAUsar).toFixed(2));
       this.ActualizarCantidad()
     },
     Comprar(){
@@ -115,7 +115,8 @@ export default {
         return;
       }
       this.cargando = true;
-
+      this.CalcularPrecio();
+      
       this.Transaccion.user_id= this.cuentaActivaID;
       this.Transaccion.action= 'purchase';
       this.Transaccion.crypto_code= this.CriptoElegida;
@@ -173,6 +174,8 @@ export default {
         return
       }
       this.cargando = true;
+      this.CalcularPrecio();
+
       this.Transaccion.user_id= this.cuentaActivaID;
       this.Transaccion.action= 'sale';
       this.Transaccion.crypto_code= this.CriptoElegida;
@@ -250,7 +253,6 @@ export default {
     this.TraerDatos();
   }
 }
-
 </script>
 
 <style scoped>

@@ -1,20 +1,20 @@
 <template>
-    <div>
-      <div class="encabezado">
-        <nav>
-          <router-link class="links" to= "/">Registro o inicio de sesion</router-link>
-          <router-link class="links" to= "/CompraVenta">Compra y Venta de criptomonedas</router-link> 
-          <router-link class="links" to= "/Historial">Historial de transacciones</router-link>
-          <router-link class="links" to= "/Estadisticas">Estadisticas</router-link> 
-        </nav>
-      </div>
-      <router-view></router-view>
+  <div>
+    <div class="encabezado">
+      <nav>
+        <router-link class="links" to= "/">Registro o inicio de sesion</router-link>
+        <router-link class="links" to= "/CompraVenta">Compra y Venta de criptomonedas</router-link> 
+        <router-link class="links" to= "/Historial">Historial de transacciones</router-link>
+        <router-link class="links" to= "/Estadisticas">Estadisticas</router-link> 
+      </nav>
     </div>
+    <router-view></router-view>
+  </div>
 </template>
 <script>
-export default {
-  name: 'PaginaDeInicio',
-}
+  export default {
+    name: 'PaginaDeInicio',
+  }
 </script>
 
 <style scoped>

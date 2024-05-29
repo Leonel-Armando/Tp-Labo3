@@ -1,7 +1,9 @@
 <template>
-  <div class="grid-layout-inicio">
+  <h2 v-if="!cuentaActivaID">Inicie sesion</h2>
+  <div v-if="cuentaActivaID" class="grid-layout-inicio">
     <div class="historial">
       <h2>Historial de Movimientos</h2>
+      <h2 v-if="movimientos.length === 0">Sin movimientos registrados</h2>
       <ul>
         <li v-for="movimiento in movimientos" :key="movimiento._id">
           <span><strong>Criptomoneda:</strong>{{ movimiento.crypto_code }}</span><br>
