@@ -9,7 +9,7 @@
         <h3>{{ movimiento.crypto_code }}</h3> 
         <span>Cantidad actual: {{ movimiento.crypto_amount }}</span><br>
         <span>valor de ${{ movimiento.money }}</span><br>
-        <h3>resultado de su inversion</h3>
+        <h3>resultado de su inversión</h3>
         <p v-if="movimiento.resultado >= 0" class="ganancia">ganancia de ${{ movimiento.resultado.toFixed(2) }}</p>
         <p v-if="movimiento.resultado < 0" class="perdida">perdida de ${{ Math.abs(movimiento.resultado).toFixed(2) }}</p>
       </div>
@@ -75,7 +75,6 @@ export default {
         }
         this.dinero += parseInt(money)
       }
-
       for (const code in agrupados) {
         const precioActual = await this.ObtenerPrecios(code);
         if (precioActual !== null) {
@@ -83,7 +82,6 @@ export default {
           agrupados[code].resultado += currentValue - agrupados[code].money;
         }
       }
-
       this.movimientosAgrupados = Object.values(agrupados);
     },
   },

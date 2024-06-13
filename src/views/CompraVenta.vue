@@ -68,8 +68,7 @@ export default {
   },
   methods: {
     Limpiar() {
-      const tiempo = 6000;
-      
+      const tiempo = 6000;      
       setTimeout(() => {
         this.resultado=''
       }, tiempo);
@@ -116,14 +115,12 @@ export default {
       }
       this.cargando = true;
       this.CalcularPrecio();
-      
       this.Transaccion.user_id= this.cuentaActivaID;
       this.Transaccion.action= 'purchase';
       this.Transaccion.crypto_code= this.CriptoElegida;
       this.Transaccion.crypto_amount= this.CantAUsar;
       this.Transaccion.money= this.precioCompra;
-      this.Transaccion.datetime= this.FechaActual();
-      
+      this.Transaccion.datetime= this.FechaActual();    
       if(!this.Transaccion.user_id){  
         alert('Error el usuario usuario no esta registrado')
         return
@@ -175,14 +172,12 @@ export default {
       }
       this.cargando = true;
       this.CalcularPrecio();
-
       this.Transaccion.user_id= this.cuentaActivaID;
       this.Transaccion.action= 'sale';
       this.Transaccion.crypto_code= this.CriptoElegida;
       this.Transaccion.crypto_amount= this.CantAUsar;
       this.Transaccion.money= this.precioCompra;
       this.Transaccion. datetime= this.FechaActual();
-      
       if(!this.Transaccion.user_id){  
         alert('Error el usuario no esta registrado')
         return

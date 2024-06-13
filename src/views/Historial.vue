@@ -12,7 +12,7 @@
           <input class="NuevaCantidadInput" v-if="movimientoEnEdicion === movimiento._id" type="number" v-model.number="ValorNuevo"><br>
           <span><strong>Valor:</strong>{{ movimiento.money }}</span>
           <span class="Error">{{ ErrorEdicion }} </span><br>
-          <span><strong>Accion:</strong>{{ traducirAccion(movimiento.action) }}</span><br>
+          <span><strong>Acción:</strong>{{ traducirAccion(movimiento.action) }}</span><br>
           <span><strong>Fecha:</strong>{{ formatFecha(movimiento.datetime) }}</span><br>
           <button v-if="movimientoEnEdicion !== movimiento._id" class="eliminar" @click="Eliminar(movimiento._id)">Eliminar</button>
           <button v-if="movimientoEnEdicion !== movimiento._id" @click="Editar(movimiento._id)">Editar</button>
@@ -58,11 +58,9 @@ export default {
         this.ErrorEdicion = 'Ingrese un valor';
         return;
       }
-
       try {
         await this.ObtenerPrecios(movimiento.crypto_code);
         this.NuevoPrecio = this.PrecioTotal * this.ValorNuevo;
-
         if (movimiento.action === 'purchase') {
           await axios.patch(`https://laboratorio3-f36a.restdb.io/rest/transactions/${movimiento._id}`, {
             crypto_amount: this.ValorNuevo,
@@ -74,7 +72,6 @@ export default {
           });
         } else if (movimiento.action === 'sale') {
           this.TraerCantidades();
-
           if (this.CantCripto[movimiento.crypto_code] >= this.ValorNuevo) {
             await axios.patch(`https://laboratorio3-f36a.restdb.io/rest/transactions/${movimiento._id}`, {
               crypto_amount: this.ValorNuevo,
@@ -92,7 +89,6 @@ export default {
           this.ErrorEdicion = 'Error desconocido';
           return;
         }
-
         this.TraerHistorial();
         this.movimientoEnEdicion = null;
         this.ValorNuevo = '';
@@ -195,6 +191,9 @@ export default {
 }
 .historial {
   padding: 20px;
+}
+.historial span {
+  font-family: "Nunito", sans-serif;
 }
 .historial h2 {
   margin-bottom: 20px;
